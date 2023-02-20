@@ -3,6 +3,8 @@ import express from 'express'
 import axios from 'axios'
 import ICAL from 'ical.js'
 import {parseCalendar} from "./calendar.js";
+import {updateFilteredCalendar} from "./update-calendar.js";
+import {mergeCalendars} from "./merge-calendars.js";
 
 const configFile = 'config.json';
 
@@ -14,7 +16,11 @@ function loadConfig() {
         calendars[calendarName] = parseCalendar(calendarName, config[calendarName]);
 
         console.log('Loaded calendar: ', calendarName);
-        console.log(`\tHas ${calendars[calendarName].rules.length} rules.`);
+        if(calendars[calendarName].type === 'filtered') {
+            console.log(`\tHas ${calendars[calendarName].rules.length} rules.`);
+        } else {
+            console.log(`\tHas ${calendars[calendarName].urls.length} urls.`);
+        }
     }
     return calendars;
 }
@@ -46,63 +52,22 @@ app.get('/:calendarName.ics', async (req, res, handleErr) => {
         return;
     }
 
-    const calenderConf = config[calendarName];
+    const calendarConf = config[calendarName];
 
-    let ics;
-    try {
-        ics = await axios.get(calenderConf.url);
-    } catch (err) {
-        handleErr(err);
-        return;
+    // log request
+    console.log(`Request for calendar ${calendarName} from ${req.ip} at ${new Date().toISOString()}`);
+
+    switch (calendarConf.type) {
+        case 'filtered':
+            await updateFilteredCalendar(calendarConf, res, handleErr);
+            break;
+        case 'merged':
+            await mergeCalendars(calendarConf, res, handleErr);
+            break;
+        default:
+            res.status(404).json('Not found.');
+            break;
     }
-    if (ics.status !== 200) {
-        res.status(500).send(`Could not get original ics data. Got response code ${ics.status} and body: ${ics.data}`);
-        return;
-    }
-
-    const ical = ICAL.parse(ics.data);
-    const events = ical[2]
-
-    const newEvents = []
-
-    for (let event of events) {
-        if(event[0] !== 'vevent') {
-            newEvents.push(event);
-            continue;
-        }
-        let eventData = event[1];
-
-        // For each rules
-        // If the rule matches the event
-        // Apply every operation to the event
-        // Add the event to the newEvents array
-        for(let rule of calenderConf.rules) {
-            const filter = rule.filter;
-            if(!filter(eventData)) {
-                newEvents.push(event);
-                continue;
-            }
-            let remove = false;
-            for(let operation of rule.operations) {
-                const newEventData = operation(eventData);
-                if(newEventData === null) {
-                    remove = true;
-                    break;
-                }
-                eventData = newEventData;
-            }
-            if(remove) {
-                continue;
-            }
-            newEvents.push(event);
-        }
-    }
-
-    ical[2] = newEvents
-    const comp = new ICAL.Component(ical);
-
-    res.setHeader('content-type', 'text/calendar');
-    res.send(comp.toString());
 });
 
 app.use((err, req, res, next) => {

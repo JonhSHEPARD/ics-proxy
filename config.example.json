@@ -1,18 +1,22 @@
 {
-    "canvas": {
-        "url": "https://canvas.uva.nl/feeds/calendars/XXX.ics",
-        "filters": [
-            {
-                "location": "Zoom Online Meeting"
-            }
-        ]
-    },
-    "work": {
-        "url": "work ics url",
-        "filters": [
-            {
-                "location": "^\\[uni\\]"
-            }
-        ]
-    }
+  "canvas": {
+    "type": "filtered",
+    "url": "https://canvas.uva.nl/feeds/calendars/XXX.ics",
+    "rules": [
+
+    ]
+  },
+  "work": {
+    "type": "merged",
+    "urls": [
+      {
+        "url": "https://calendar.google.com/calendar/ical/XXX%40group.calendar.google.com/public/basic.ics",
+        "private": false
+      },
+      {
+        "url": "https://calendar.google.com/calendar/ical/XXX%40group.calendar.google.com/public/basic.ics",
+        "private": true
+      }
+    ]
+  }
 }

@@ -8,6 +8,18 @@ returns the filtered ics file.
 The `config.json` file configures all available calandars and their filters.
 You can create it by copying the `config.example.json` file.
 
+You can make two types of calendars :
+
+- `filtered`: This calendar will filter the events based on the filters specified in the `rules` property.
+- `merged`: This calendar will merge the events of the calendars specified in the `urls` property.
+
+### The `filtered` calendar
+
+The first property required for a `filtered` calendar is the `url` property, which specifies the url of the ics file to
+use.
+You can then make the filters using the `rules` property.
+You can also decide what to do with the events that match the filters using the `operations` property.
+
 The filters make it possible to create a compicated if statement.
 
 The following json:
@@ -15,6 +27,7 @@ The following json:
 ```json
 {
   "test": {
+    "type": "filtered",
     "url": "https://canvas.uva.nl/feeds/calendars/XXX.ics",
     "rules": [
       {
@@ -52,7 +65,7 @@ if (event.location === "Zoom Online Meeting" && event.summary.match(/.*college.*
 }
 ```
 
-### Filters
+#### Filters
 
 The filters allows to select events based.
 
@@ -88,6 +101,52 @@ The `if` filter has the following properties:
       valid regular expression.**
 
 You can also add the property `negate` with the value `true` to the `if` filter to negate the result of the filter.
+
+#### Operations
+
+The operations allow to modify the events that match the filters.
+
+There is currently 3 types of operations, they are all represented by an array with the first element being the type of
+the operation and the following elements being the arguments for the operation.
+
+- `remove`: This operation will remove the event from the ics file, it takes no arguments.
+- `edit`: This operation will edit the event, it takes two arguments:
+    - The property to edit, for example `event.location`.
+    - The new value for the property.
+- `editRegex`: This operation will edit the event using a regular expression, it takes three arguments:
+    - The property to edit, for example `event.location`.
+    - The regular expression to use.
+    - The new value for the property.
+
+### The `merged` calendar
+
+The first and only property required for a `merged` calendar is the `urls` property, which specifies the urls of the ics
+files to use.
+
+The urls should be objects with the following properties:
+
+- `url`: The url of the ics file.
+- `private`: A boolean indicating if the events of this calendar should be private or not.
+
+Example :
+
+```json
+{
+  "test": {
+    "type": "merged",
+    "urls": [
+      {
+        "url": "https://canvas.uva.nl/feeds/calendars/XXX.ics",
+        "private": false
+      },
+      {
+        "url": "https://canvas.uva.nl/feeds/calendars/XXX.ics",
+        "private": true
+      }
+    ]
+  }
+}
+```
 
 ## Running the server
 

@@ -71,7 +71,7 @@ const allowedOperations = {
     }
 }
 
-export function parseIfOperand(operand) {
+function parseIfOperand(operand) {
     return function (eventData) {
         if (operand.startsWith('event.')) {
             const key = operand.substring('event.'.length);
@@ -88,7 +88,7 @@ export function parseIfOperand(operand) {
     }
 }
 
-export function parseFilter(filter) {
+function parseFilter(filter) {
     if (typeof filter !== 'object') {
         throw new Error(`Invalid filter: ${filter}`);
     }
@@ -151,17 +151,7 @@ export function parseFilter(filter) {
     }
 }
 
-export function parseCalendar(calendarName, calendar) {
-    // Calendar name must be a string compliant with the following regex : [a-zA-Z0-9_\-]+
-    if (typeof calendarName !== 'string' || !calendarName.match(/^[a-zA-Z0-9_\-]+$/)) {
-        throw new Error(`Invalid calendar name: ${calendarName}`);
-    }
-
-    // Calendar must be an object
-    if (typeof calendar !== 'object') {
-        throw new Error(`Invalid calendar: ${calendarName}`);
-    }
-
+function parseFilteredCalendar(calendarName, calendar) {
     // Calendar must have an url
     if (!calendar.hasOwnProperty('url')) {
         throw new Error(`Invalid calendar: ${calendarName} (missing url)`);
@@ -208,7 +198,7 @@ export function parseCalendar(calendarName, calendar) {
 
             // Rules must have an operation property
             if (!rule.hasOwnProperty('operations')) {
-                throw new Error(`Invalid calendar: ${calendarName} (missing operation)`);
+                throw new Error(`Invalid calendar: ${calendarName} (missing operations)`);
             }
 
             const operations = rule.operations;
@@ -257,8 +247,90 @@ export function parseCalendar(calendarName, calendar) {
     }
 
     return {
+        type: 'filtered',
         name: calendarName,
         url: url,
         rules: checkedRules
     };
+}
+
+function parseMergedCalendar(calendarName, calendar) {
+    // Calendar must have a urls property
+    if (!calendar.hasOwnProperty('urls')) {
+        throw new Error(`Invalid calendar: ${calendarName} (missing urls)`);
+    }
+
+    const urls = calendar.urls;
+
+    // Urls must be an array
+    if (!Array.isArray(urls)) {
+        throw new Error(`Invalid calendar: ${calendarName} (invalid urls)`);
+    }
+
+    // Urls must not be empty
+    if (urls.length === 0) {
+        throw new Error(`Invalid calendar: ${calendarName} (empty urls)`);
+    }
+
+    let checkedUrls = [];
+
+    // Each url must be an object with a url property and a private property
+    for (let i = 0; i < urls.length; i++) {
+        const url = urls[i];
+
+        if (typeof url !== 'object') {
+            throw new Error(`Invalid calendar: ${calendarName} (invalid url)`);
+        }
+
+        if (!url.hasOwnProperty('url')) {
+            throw new Error(`Invalid calendar: ${calendarName} (missing url)`);
+        }
+
+        if (typeof url.url !== 'string') {
+            throw new Error(`Invalid calendar: ${calendarName} (invalid url)`);
+        }
+
+        if (!url.hasOwnProperty('private')) {
+            throw new Error(`Invalid calendar: ${calendarName} (missing private)`);
+        }
+
+        if (typeof url.private !== 'boolean') {
+            throw new Error(`Invalid calendar: ${calendarName} (invalid private)`);
+        }
+
+        checkedUrls.push(url);
+    }
+
+    return {
+        type: 'merged',
+        name: calendarName,
+        urls: checkedUrls
+    }
+}
+
+export function parseCalendar(calendarName, calendar) {
+    // Calendar name must be a string compliant with the following regex : [a-zA-Z0-9_\-]+
+    if (typeof calendarName !== 'string' || !calendarName.match(/^[a-zA-Z0-9_\-]+$/)) {
+        throw new Error(`Invalid calendar name: ${calendarName}`);
+    }
+
+    // Calendar must be an object
+    if (typeof calendar !== 'object') {
+        throw new Error(`Invalid calendar: ${calendarName}`);
+    }
+
+    // Calendar must have a type property
+    if (!calendar.hasOwnProperty('type')) {
+        throw new Error(`Invalid calendar: ${calendarName} (missing type)`);
+    }
+
+    const type = calendar.type;
+    switch (type) {
+        case 'filtered':
+            return parseFilteredCalendar(calendarName, calendar);
+        case 'merged':
+            return parseMergedCalendar(calendarName, calendar);
+    }
+
+    throw new Error(`Invalid calendar: ${calendarName} (invalid type)`);
 }
