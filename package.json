@@ -1,25 +1,30 @@
 {
-  "name": "ics_filter",
+  "name": "ics-proxy",
   "version": "1.0.0",
-  "description": "Filter away all events from an iCal stream where the location is Zoom",
-  "main": "index.js",
+  "description": "Filter ics calendars",
+  "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node src/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/quinten1333/ics_filter.git"
+    "url": "git+https://github.com/JonhSHEPARD/ics-proxy.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/quinten1333/ics_filter/issues"
+    "url": "https://github.com/JonhSHEPARD/ics-proxy/issues"
   },
-  "homepage": "https://github.com/quinten1333/ics_filter#readme",
+  "homepage": "https://github.com/JonhSHEPARD/ics-proxy#readme",
   "dependencies": {
     "axios": "^0.27.2",
     "express": "^4.17.1",
-    "ical.js": "^1.4.0"
+    "ical.js": "^1.4.0",
+    "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.0",
+    "cors": "^2.8.5"
   }
 }
