@@ -118,5 +118,5 @@ docker save <image name> | ssh -C <ssh connection param> docker load
 ## Import the ics feed from this server.
 
 Using your favourite calendar software, import the new file from the server by navigating to:
-`domain.name/<calanderName>.ics`
+`domain.name/<calendarName>.ics`
 Where <calendarName> is the key in `config.json` of the calendar you wish to retrieve.

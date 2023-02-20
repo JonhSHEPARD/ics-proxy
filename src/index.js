@@ -1,6 +1,5 @@
 import fs from 'fs'
 import express from 'express'
-import cors from 'cors'
 import axios from 'axios'
 import ICAL from 'ical.js'
 import {parseCalendar} from "./calendar.js";
@@ -33,7 +32,6 @@ fs.watchFile(configFile, (curr, prev) => {
 });
 
 const app = express()
-app.use('*', cors());
 const port = process.env.PORT || 3000
 
 app.get('/', (req, res) => {

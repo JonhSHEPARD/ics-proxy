@@ -1,9 +1,9 @@
-FROM node:current-alpine3.12
-LABEL org.opencontainers.image.source https://github.com/quinten1333/ics_filter
+FROM node:18-alpine
+LABEL org.opencontainers.image.source="https://github.com/JonhSHEPARD/ics-proxy"
 
 WORKDIR /app
 
-COPY ./package.json .
+COPY package.json package-lock.json .
 RUN npm install
 
 COPY . .
