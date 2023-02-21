@@ -30,7 +30,7 @@ export async function updateFilteredCalendar(calendarConf, res, handleErr) {
         // If the rule matches the event
         // Apply every operation to the event
         // Add the event to the newEvents array
-        for(let rule of calenderConf.rules) {
+        for(let rule of calendarConf.rules) {
             const filter = rule.filter;
             if(!filter(eventData)) {
                 newEvents.push(event);
