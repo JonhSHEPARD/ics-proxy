@@ -4,7 +4,7 @@ import ICAL from "ical.js";
 export async function updateFilteredCalendar(calendarConf, res, handleErr) {
     let ics;
     try {
-        ics = await axios.get(calenderConf.url);
+        ics = await axios.get(calendarConf.url);
     } catch (err) {
         handleErr(err);
         return;
