@@ -53,9 +53,10 @@ app.get('/:calendarName.ics', async (req, res, handleErr) => {
     }
 
     const calendarConf = config[calendarName];
+    const ip = req.get("X-Real-Ip");
 
     // log request
-    console.log(`Request for calendar ${calendarName} from ${req.ip} at ${new Date().toISOString()}`);
+    console.log(`Request for calendar ${calendarName} from ${ip} at ${new Date().toISOString()}`);
 
     switch (calendarConf.type) {
         case 'filtered':
